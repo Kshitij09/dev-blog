@@ -1,11 +1,22 @@
 {
   
+    
+        "post0": {
+            "title": "PyTorch Exercises",
+            "content": "Inspired by 100-numpy-exercises . 1. Import PyTorch and print version (&#9733;&#9734;&#9734;) . #collapse import torch torch.__version__ . . &#39;1.4.0&#39; . 2. Create a null vector of size 10 (&#9733;&#9734;&#9734;) . #collapse torch.zeros(10) . . tensor([0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]) . 3. Create a vector with values ranging from 10 to 49 (&#9733;&#9734;&#9734;) . #collapse torch.arange(10,50) . . tensor([10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49]) . 4. Reverse a vector &amp; tensor (&#9733;&#9734;&#9734;) . #collapse #hide_output print(&quot;Vector&quot;) x = torch.arange(10) print(&quot;Original: &quot;,x) print(&quot;Reversed: &quot;, x.flip(0)) print(&quot;Tensor&quot;) x = x.view(5,2) print(&quot;Original: n&quot;,x) print(&quot;Reversed(rows): n&quot;, x.flip(0)) print(&quot;Reversed(cols): n&quot;, x.flip(1)) . . Vector Original: tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) Reversed: tensor([9, 8, 7, 6, 5, 4, 3, 2, 1, 0]) Tensor Original: tensor([[0, 1], [2, 3], [4, 5], [6, 7], [8, 9]]) Reversed(rows): tensor([[8, 9], [6, 7], [4, 5], [2, 3], [0, 1]]) Reversed(cols): tensor([[1, 0], [3, 2], [5, 4], [7, 6], [9, 8]]) . 5. Create a 3x3 matrix with values ranging from 0 to 8 (&#9733;&#9734;&#9734;) . #collapse torch.arange(9).view(3,3) . . tensor([[0, 1, 2], [3, 4, 5], [6, 7, 8]]) . 6. Create a 3x3 Identity Matrix (&#9733;&#9734;&#9734;) . #collapse torch.eye(3) . . tensor([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]]) . 7. Create a 3x3x3 matrix with random values (&#9733;&#9734;&#9734;) . (output hidden to avoid verbosity) . #collapse #hide_output # Random Uniform print(torch.rand(3,3)) # Random Normal print(torch.randn(3,3)) # Random int (low to high) print(torch.randint(1,10,(3,3))) # Random Permutations of given range print(torch.randperm(9).view(3,3)) . . tensor([[0.9199, 0.3884, 0.2975], [0.8924, 0.7694, 0.6850], [0.4952, 0.5713, 0.8097]]) tensor([[-2.1540, -0.4610, 0.3117], [-1.0630, -0.5528, -0.1765], [ 0.4584, 0.5330, 1.0833]]) tensor([[9, 3, 4], [9, 7, 4], [7, 1, 2]]) tensor([[8, 3, 7], [0, 4, 1], [6, 2, 5]]) . 8. Create a random vector of size 20 and find following stats: (&#9733;&#9734;&#9734;) . min,max, sum | mean, variance, standard deviation | . #collapse x = torch.randint(20,(20,)).float() print(x) x.min() , x.max(), x.sum(), x.mean(), x.std(), x.var() . . tensor([18., 15., 18., 4., 18., 16., 17., 2., 10., 16., 13., 1., 13., 8., 15., 10., 16., 17., 18., 9.]) . (tensor(1.), tensor(18.), tensor(254.), tensor(12.7000), tensor(5.4782), tensor(30.0105)) . 9. Create a 2d array with 1 on the border and 0 inside (&#9733;&#9734;&#9734;) . #collapse x = torch.ones(5,5) x[1:-1,1:-1] = 0 x . . tensor([[1., 1., 1., 1., 1.], [1., 0., 0., 0., 1.], [1., 0., 0., 0., 1.], [1., 0., 0., 0., 1.], [1., 1., 1., 1., 1.]]) . 10. How to add a border (filled with 0&#39;s) around an existing array? (&#9733;&#9734;&#9734;) . #collapse import torch.nn.functional as F x = torch.randn(3,3) F.pad(x,(1,1,1,1),&#39;constant&#39;,0) . . tensor([[ 0.0000, 0.0000, 0.0000, 0.0000, 0.0000], [ 0.0000, 0.5841, 0.2092, -1.5766, 0.0000], [ 0.0000, -0.5721, -0.9200, -0.7613, 0.0000], [ 0.0000, -0.0597, -1.8524, 0.1481, 0.0000], [ 0.0000, 0.0000, 0.0000, 0.0000, 0.0000]]) .",
+            "url": "https://kshitij09.github.io/dev-blog/pytorch/2020/04/22/PyTorch-Exercises.html",
+            "relUrl": "/pytorch/2020/04/22/PyTorch-Exercises.html",
+            "date": " • Apr 22, 2020"
+        }
+        
+    
+  
 
   
   
 
   
-      "page1": {
+      ,"page1": {
           "title": "About Me",
           "content": "This is where you put the contents of your About page. Like all your pages, it’s in Markdown format. . This website is powered by fastpages 1. . a blogging platform that natively supports Jupyter notebooks in addition to other formats. &#8617; . |",
           "url": "https://kshitij09.github.io/dev-blog/about/",
