@@ -335,7 +335,7 @@ table td { border: 1px solid #e8e8e8; }
 /*--- IMPORT STYLES FOR FASTPAGES ---*/
 .post img { display: block; vertical-align: top; margin-left: auto; margin-right: auto; }
 
-img.emoji { display: inline-block !important; vertical-align: middle !important; transform: none; padding: 0; margin: 0; width: 22px; height: 22px; }
+img.emoji { display: inline !important; vertical-align: baseline !important; }
 
 .post figcaption { text-align: center; font-size: .8rem; font-style: italic; color: light-grey; }
 
@@ -353,11 +353,9 @@ h3, h4 { margin-top: 1.5rem !important; }
 
 p { margin-top: 1rem !important; margin-bottom: 1rem !important; }
 
-p code { color: #f92672; background-color: #fafafa; border: hidden; font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace; font-size: 95%; }
-
 h1, h2, h3, h4 { font-weight: normal !important; margin-bottom: 0.5rem !important; }
 
-h1 code, h2 code, h3 code, h4 code { color: #f92672; background-color: #fafafa; border: hidden; font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace; font-size: 95%; }
+h1 code, h2 code, h3 code, h4 code { font-size: 100%; }
 
 pre { margin-bottom: 1.5rem !important; }
 
