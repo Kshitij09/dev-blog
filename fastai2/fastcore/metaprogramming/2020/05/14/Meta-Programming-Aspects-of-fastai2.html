@@ -3,36 +3,38 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
-<title>Meta Programming Aspects of fastai2 | Fueled Debugger</title>
+<title>Metaprogramming aspects of fastai2 | Fueled Debugger</title>
 <meta name="generator" content="Jekyll v4.0.0" />
-<meta property="og:title" content="Meta Programming Aspects of fastai2" />
+<meta property="og:title" content="Metaprogramming aspects of fastai2" />
 <meta name="author" content="Kshitij Patil" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="fastai-v2 has “transformed” the way we write Python for Deep Learning. A library called ‘fastcore’ is where all the magic happens and is framework agnostic, so most of the ideas I’m about to discuss could be easily integrated in your favourite python library." />
 <meta property="og:description" content="fastai-v2 has “transformed” the way we write Python for Deep Learning. A library called ‘fastcore’ is where all the magic happens and is framework agnostic, so most of the ideas I’m about to discuss could be easily integrated in your favourite python library." />
-<link rel="canonical" href="https://kshitij09.github.io/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html" />
-<meta property="og:url" content="https://kshitij09.github.io/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html" />
+<link rel="canonical" href="https://kshitij09.github.io/dev-blog/fastai2/fastcore/metaprogramming/2020/05/14/Meta-Programming-Aspects-of-fastai2.html" />
+<meta property="og:url" content="https://kshitij09.github.io/dev-blog/fastai2/fastcore/metaprogramming/2020/05/14/Meta-Programming-Aspects-of-fastai2.html" />
 <meta property="og:site_name" content="Fueled Debugger" />
+<meta property="og:image" content="https://kshitij09.github.io/dev-blog/images/logo.png" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2020-05-14T00:00:00-05:00" />
 <script type="application/ld+json">
-{"author":{"@type":"Person","name":"Kshitij Patil"},"description":"fastai-v2 has “transformed” the way we write Python for Deep Learning. A library called ‘fastcore’ is where all the magic happens and is framework agnostic, so most of the ideas I’m about to discuss could be easily integrated in your favourite python library.","mainEntityOfPage":{"@type":"WebPage","@id":"https://kshitij09.github.io/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html"},"@type":"BlogPosting","url":"https://kshitij09.github.io/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html","headline":"Meta Programming Aspects of fastai2","dateModified":"2020-05-14T00:00:00-05:00","datePublished":"2020-05-14T00:00:00-05:00","@context":"https://schema.org"}</script>
+{"author":{"@type":"Person","name":"Kshitij Patil"},"description":"fastai-v2 has “transformed” the way we write Python for Deep Learning. A library called ‘fastcore’ is where all the magic happens and is framework agnostic, so most of the ideas I’m about to discuss could be easily integrated in your favourite python library.","mainEntityOfPage":{"@type":"WebPage","@id":"https://kshitij09.github.io/dev-blog/fastai2/fastcore/metaprogramming/2020/05/14/Meta-Programming-Aspects-of-fastai2.html"},"@type":"BlogPosting","url":"https://kshitij09.github.io/dev-blog/fastai2/fastcore/metaprogramming/2020/05/14/Meta-Programming-Aspects-of-fastai2.html","headline":"Metaprogramming aspects of fastai2","dateModified":"2020-05-14T00:00:00-05:00","datePublished":"2020-05-14T00:00:00-05:00","image":"https://kshitij09.github.io/dev-blog/images/logo.png","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/dev-blog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://kshitij09.github.io/dev-blog/feed.xml" title="Fueled Debugger" /><link rel="shortcut icon" type="image/x-icon" href="/dev-blog/images/favicon.ico"><!-- Begin Jekyll SEO tag v2.6.1 -->
-<title>Meta Programming Aspects of fastai2 | Fueled Debugger</title>
+<title>Metaprogramming aspects of fastai2 | Fueled Debugger</title>
 <meta name="generator" content="Jekyll v4.0.0" />
-<meta property="og:title" content="Meta Programming Aspects of fastai2" />
+<meta property="og:title" content="Metaprogramming aspects of fastai2" />
 <meta name="author" content="Kshitij Patil" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="fastai-v2 has “transformed” the way we write Python for Deep Learning. A library called ‘fastcore’ is where all the magic happens and is framework agnostic, so most of the ideas I’m about to discuss could be easily integrated in your favourite python library." />
 <meta property="og:description" content="fastai-v2 has “transformed” the way we write Python for Deep Learning. A library called ‘fastcore’ is where all the magic happens and is framework agnostic, so most of the ideas I’m about to discuss could be easily integrated in your favourite python library." />
-<link rel="canonical" href="https://kshitij09.github.io/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html" />
-<meta property="og:url" content="https://kshitij09.github.io/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html" />
+<link rel="canonical" href="https://kshitij09.github.io/dev-blog/fastai2/fastcore/metaprogramming/2020/05/14/Meta-Programming-Aspects-of-fastai2.html" />
+<meta property="og:url" content="https://kshitij09.github.io/dev-blog/fastai2/fastcore/metaprogramming/2020/05/14/Meta-Programming-Aspects-of-fastai2.html" />
 <meta property="og:site_name" content="Fueled Debugger" />
+<meta property="og:image" content="https://kshitij09.github.io/dev-blog/images/logo.png" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2020-05-14T00:00:00-05:00" />
 <script type="application/ld+json">
-{"author":{"@type":"Person","name":"Kshitij Patil"},"description":"fastai-v2 has “transformed” the way we write Python for Deep Learning. A library called ‘fastcore’ is where all the magic happens and is framework agnostic, so most of the ideas I’m about to discuss could be easily integrated in your favourite python library.","mainEntityOfPage":{"@type":"WebPage","@id":"https://kshitij09.github.io/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html"},"@type":"BlogPosting","url":"https://kshitij09.github.io/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html","headline":"Meta Programming Aspects of fastai2","dateModified":"2020-05-14T00:00:00-05:00","datePublished":"2020-05-14T00:00:00-05:00","@context":"https://schema.org"}</script>
+{"author":{"@type":"Person","name":"Kshitij Patil"},"description":"fastai-v2 has “transformed” the way we write Python for Deep Learning. A library called ‘fastcore’ is where all the magic happens and is framework agnostic, so most of the ideas I’m about to discuss could be easily integrated in your favourite python library.","mainEntityOfPage":{"@type":"WebPage","@id":"https://kshitij09.github.io/dev-blog/fastai2/fastcore/metaprogramming/2020/05/14/Meta-Programming-Aspects-of-fastai2.html"},"@type":"BlogPosting","url":"https://kshitij09.github.io/dev-blog/fastai2/fastcore/metaprogramming/2020/05/14/Meta-Programming-Aspects-of-fastai2.html","headline":"Metaprogramming aspects of fastai2","dateModified":"2020-05-14T00:00:00-05:00","datePublished":"2020-05-14T00:00:00-05:00","image":"https://kshitij09.github.io/dev-blog/images/logo.png","@context":"https://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 
 <link href="https://unpkg.com/@primer/css/dist/primer.css" rel="stylesheet" />
@@ -107,7 +109,7 @@ window.onload = wrap_img;
         <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title p-name" itemprop="name headline">Meta Programming Aspects of fastai2</h1>
+    <h1 class="post-title p-name" itemprop="name headline">Metaprogramming aspects of fastai2</h1>
 <p class="page-description">fastai-v2 has "transformed" the way we write Python for Deep Learning. A library called 'fastcore' is where all the magic happens and is framework agnostic, so most of the ideas I'm about to discuss could be easily integrated in your favourite python library.</p>
 <p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-05-14T00:00:00-05:00" itemprop="datePublished">
         May 14, 2020
@@ -124,7 +126,13 @@ window.onload = wrap_img;
     
       <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i> 
       
-        <a class="category-tags-link" href="/dev-blog/categories/#fastai">fastai</a>
+        <a class="category-tags-link" href="/dev-blog/categories/#fastai2">fastai2</a>
+         
+      
+        <a class="category-tags-link" href="/dev-blog/categories/#fastcore">fastcore</a>
+         
+      
+        <a class="category-tags-link" href="/dev-blog/categories/#metaprogramming">metaprogramming</a>
         
       
       </p>
@@ -612,7 +620,7 @@ window.onload = wrap_img;
   </div>
 <!-- from https://github.com/utterance/utterances -->
 <script src="https://utteranc.es/client.js" repo="Kshitij09/dev-blog" issue-term="title" label="blogpost-comment" theme="github-light" crossorigin="anonymous" async>
-</script><a class="u-url" href="/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html" hidden></a>
+</script><a class="u-url" href="/dev-blog/fastai2/fastcore/metaprogramming/2020/05/14/Meta-Programming-Aspects-of-fastai2.html" hidden></a>
 </article>
       </div>
     </main><footer class="site-footer h-card">
