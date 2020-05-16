@@ -1,11 +1,12 @@
 ---
-title: Meta Programming Aspects of fastai2
+title: Metaprogramming aspects of fastai2
 description: fastai-v2 has "transformed" the way we write Python for Deep Learning. A library called 'fastcore' is where all the magic happens and is framework agnostic, so most of the ideas I'm about to discuss could be easily integrated in your favourite python library.
 toc: true
 badges: false
 comments: true
+image: images/logo.png
 author: Kshitij Patil
-categories: [fastai]
+categories: [fastai2, fastcore, metaprogramming]
 layout: post
 ---
 
