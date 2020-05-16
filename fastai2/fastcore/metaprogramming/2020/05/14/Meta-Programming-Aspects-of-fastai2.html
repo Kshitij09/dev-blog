@@ -160,7 +160,7 @@ window.onload = wrap_img;
 <h1 id="encode-for-model-decode-for-yourself">
 <a class="anchor" href="#encode-for-model-decode-for-yourself" aria-hidden="true"><span class="octicon octicon-link"></span></a><code class="highlighter-rouge">encode</code> for model, <code class="highlighter-rouge">decode</code> for yourself</h1>
 
-<p>Conventionally, in PyTorch, we write most of the data pre-processing logic in a single block of code, IE, inside <code class="highlighter-rouge">__getitem__</code> of PyTorch <code class="highlighter-rouge">Dataset</code>. Even if we try to create separate methods for different parts of the Pipeline, we often end up creating highly coupled logic, which works best for your current project, but you often hesitate to reuse this code for your next project.</p>
+<p>Conventionally, in PyTorch, we write most of the data pre-processing logic in a single block of code, IE, inside <code class="highlighter-rouge">__getitem__</code> of PyTorch <code class="highlighter-rouge">Dataset</code>. Even if we try to create separate methods for different parts of the Pipeline, we end up creating highly coupled logic, which works best for your current project, but you often hesitate to reuse this code for your next project.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">WhaleDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datafolder</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s">'train'</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">transform</span> <span class="o">=</span>
@@ -195,20 +195,20 @@ window.onload = wrap_img;
 </span>            <span class="k">return</span> <span class="n">image</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_files_list</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
 </code></pre></div></div>
 
-<p>The problem with this approach is a lack of modularity and the ability to test individual block of code. Certain problems that might be left unnoticed with this design are (Considering image classification problem):</p>
+<p>The problem with this approach is a lack of modularity and the ability to test individual block of code. Certain problems that might be left unnoticed with this design are (considering image classification problem):</p>
 
 <ol>
   <li>You displayed a single image from given filenames, are you sure the same image is not being repeated in a batch?</li>
-  <li>You got the numeric labels from given text labels, but are you sure they’re mapped properly, do you know their reverse mapping?</li>
-  <li>how you tried several permutations of your given augmentations? What if your subject is getting cropped out of the image and you left wondering why my model isn’t converging 🤔</li>
-  <li>Are you sure that your split logic isn’t mixing the train and validation set?</li>
+  <li>You got the numeric labels from given text labels, but are you sure they’re mapped properly, do you know their reverse mapping, as in, which no. represents what?</li>
+  <li>have you tried several permutations of your given augmentations? What if your subject is getting cropped out of the image and you left wondering why my model isn’t converging 🤔</li>
+  <li>Are you sure the split logic isn’t mixing the train and validation set?</li>
 </ol>
 
-<p>We need a better way to organize the <code class="highlighter-rouge">Transforms</code> and fastai-v2 has introduced a novel way for this. A <code class="highlighter-rouge">Transform</code> class in fastai2 has a special behavior due to its <code class="highlighter-rouge">encodes</code>, <code class="highlighter-rouge">decodes</code>, and <code class="highlighter-rouge">setup</code> methods.</p>
+<p>We need a better way to organize the <code class="highlighter-rouge">Transforms</code> and fastai has introduced a novel way for this. A <code class="highlighter-rouge">Transform</code> class from fastcore (library from fastai) has a special behavior due to its <code class="highlighter-rouge">encodes</code>, <code class="highlighter-rouge">decodes</code>, and <code class="highlighter-rouge">setup</code> methods.</p>
 
 <p><img src="/dev-blog/images/meta-fastai/fastai-encode-decode.png" style="zoom:200%;"></p>
 
-<p>As name suggests, <code class="highlighter-rouge">encodes</code> hold primary logic of transforming the input, which next <code class="highlighter-rouge">transform</code> will grab as input, process it and pass-on to the next. Similarly,  <code class="highlighter-rouge">decodes</code> has the logic of undoing the effect of current transform. An ideal use-case for <code class="highlighter-rouge">decodes</code> is to manage the inconsistencies between different libraries.</p>
+<p>As name suggests, <code class="highlighter-rouge">encodes</code> hold primary logic of transforming the input, which the next <code class="highlighter-rouge">transform</code> will grab as input, process it and pass-on to the next. Similarly,  <code class="highlighter-rouge">decodes</code> has the logic of undoing the effect of current transform. An ideal use-case for <code class="highlighter-rouge">decodes</code> is to manage the inconsistencies between different libraries.</p>
 
 <blockquote>
   <p>For instance, in object detection, suppose your math library uses a matrix notations for coordinates, so model will be trained to predict the bounding in that form, but your visualization library uses the exact opposite, so you want to undo the preprocessing step while showing the results and <code class="highlighter-rouge">decodes</code> is the place to keep that logic.</p>
@@ -275,7 +275,7 @@ window.onload = wrap_img;
 <span class="k">def</span> <span class="nf">encodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">TensorImage</span><span class="p">):</span> <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">double</span><span class="p">()</span><span class="o">.</span><span class="n">div_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">div</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-7</span>
 </code></pre></div></div>
 
-<p>which means, you don’t need to write a class extending <code class="highlighter-rouge">Transform</code>, if it’s some variation of existing one in the library, just write type-annotated <code class="highlighter-rouge">encodes</code> with a decorator of that method.</p>
+<p>which means, you don’t need to write a class extending <code class="highlighter-rouge">Transform</code> if it’s some variation of existing one in the library, just write type-annotated <code class="highlighter-rouge">encodes</code> with a decorator of that method.</p>
 
 <blockquote>
   <p>You don’t necessarily need extend the <code class="highlighter-rouge">Transform</code> class to make type-dispatch work. There’s a decorator for that as well</p>
@@ -347,12 +347,15 @@ window.onload = wrap_img;
   <p>in simple terms, your method doesn’t actually accept the kwargs, but the only parameters that are available in the method you’re delegating to.</p>
 </blockquote>
 
-<p>For example, in fastai, there’s a method called <code class="highlighter-rouge">save_model</code> which has the logic to save the PyTorch model to given path. Now <code class="highlighter-rouge">Learner</code> has the “model”, “optimizer state” and some parameters which could be used to create the “destination path” for <code class="highlighter-rouge">save_model</code>, so <code class="highlighter-rouge">Learner</code> will build the desired path and hand over its available parameters to <code class="highlighter-rouge">save_model</code> to perform actual save:</p>
+<p>For example, in fastai, there’s a method called <code class="highlighter-rouge">save_model</code> which has the logic to save the PyTorch model to a given path. Now <code class="highlighter-rouge">Learner</code> has the “model”, “optimizer state” and some parameters which could be used to create the “destination path” for <code class="highlighter-rouge">save_model</code>, so <code class="highlighter-rouge">Learner</code> will build the desired path and hand over its available parameters to <code class="highlighter-rouge">save_model</code> to perform actual save:</p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">delegates</span><span class="p">(</span><span class="n">save_model</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-	<span class="nb">file</span> <span class="o">=</span> <span class="n">join_path_file</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s">'.pth'</span><span class="p">)</span>
-	<span class="n">save_model</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">'opt'</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Learner</span><span class="p">():</span>
+    <span class="o">...</span>
+    
+    <span class="o">@</span><span class="n">delegates</span><span class="p">(</span><span class="n">save_model</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">file</span> <span class="o">=</span> <span class="n">join_path_file</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s">'.pth'</span><span class="p">)</span>
+        <span class="n">save_model</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">'opt'</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div></div>
 
 <p><code class="highlighter-rouge">@delegates</code> could also be used with classes. With no target specified, it’ll delegate the parameters from you constructor to the base class’s one.</p>
@@ -394,7 +397,7 @@ window.onload = wrap_img;
     <span class="o">...</span>
 </code></pre></div></div>
 
-<p>of course there’s no harm in writing this way, but doesn’t it look too bulky? what if it grows even further? by the time you reach to actual logic for this method, the parameter list will already scare you off.  Also, say you’ve written this list somewhere else, why do you want to re-write here as well? <code class="highlighter-rouge">@use_kwargs</code> will make things a little cute for you <img class="emoji" title=":wink:" alt=":wink:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f609.png" height="20" width="20"></p>
+<p>of course there’s no harm in writing this way, but doesn’t it look too bulky? what if it grows even further? by the time you reach to actual logic of this method, the parameter list will already scare you off.  Also, say you’ve written this list somewhere else, why do you want to re-write here as well? <code class="highlighter-rouge">@use_kwargs</code> will make things a little cute for you <img class="emoji" title=":wink:" alt=":wink:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f609.png" height="20" width="20"></p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Trainer</span><span class="p">:</span>
   <span class="n">_none_attrs</span><span class="o">=</span><span class="s">"""iterations_per_epoch data_device loss_wights sampler 
@@ -461,7 +464,7 @@ window.onload = wrap_img;
             <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 </code></pre></div></div>
 
-<p><img class="emoji" title=":frowning:" alt=":frowning:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f626.png" height="20" width="20"> <img class="emoji" title=":cold_sweat:" alt=":cold_sweat:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f630.png" height="20" width="20"> I’m not at all saying this bad, in fact, this follows the PEP8 coding standards; but the first question came into my mind was, what is <code class="highlighter-rouge">image.ImageDataGenerator</code> ? then I got to know, it came from another package called <code class="highlighter-rouge">keras_preprocessing</code>. So the next obvious question was, does that library has the exact same constructor, and indeed it <a href="https://github.com/keras-team/keras-preprocessing/blob/371ca04391566d00d4fea4b347612b1efc146997/keras_preprocessing/image/image_data_generator.py#L254">has</a>. Now, isn’t it redundant code? and what if, you’ve some factory methods in the class that uses partial or exact same set of parameters? Can we do better?</p>
+<p><img class="emoji" title=":frowning:" alt=":frowning:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f626.png" height="20" width="20"> <img class="emoji" title=":cold_sweat:" alt=":cold_sweat:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f630.png" height="20" width="20"> I’m not at all saying this bad, in fact, this follows the PEP8 coding standards; but the first question came into my mind was, what is <code class="highlighter-rouge">image.ImageDataGenerator</code> ? then I got to know, it came from another library called <code class="highlighter-rouge">keras_preprocessing</code>. So the next obvious question was, does that library has the exact same constructor, and indeed it <a href="https://github.com/keras-team/keras-preprocessing/blob/371ca04391566d00d4fea4b347612b1efc146997/keras_preprocessing/image/image_data_generator.py#L254">has</a>. Now, isn’t it redundant code? and what if, you’ve some factory methods in the class that uses partial or exact same set of parameters? Can we do any better?</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ImageDataGenerator2</span><span class="p">(</span><span class="n">IGenerator</span><span class="p">):</span>
   <span class="n">_datagen_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">featurewise_center</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
@@ -551,7 +554,7 @@ window.onload = wrap_img;
 <a class="anchor" href="#docs-in-the-source-code-fire" aria-hidden="true"><span class="octicon octicon-link"></span></a><code class="highlighter-rouge">@docs</code> in the source code <img class="emoji" title=":fire:" alt=":fire:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f525.png" height="20" width="20">
 </h1>
 
-<p>Writing documentation in the source code is absolutely rewarding for two reasons.</p>
+<p>Writing documentation in the source code is absolutely rewarding, mainly, for two reasons.</p>
 
 <ol>
   <li>It makes your source code readable</li>
@@ -579,7 +582,7 @@ window.onload = wrap_img;
 <h1 id="get-it-easily-getattr">
 <a class="anchor" href="#get-it-easily-getattr" aria-hidden="true"><span class="octicon octicon-link"></span></a>Get it easily (<code class="highlighter-rouge">GetAttr</code>)</h1>
 
-<p>A wrapper class sometimes makes things redundant. <code class="highlighter-rouge">GettAttr</code> is meant to simplify this if you use the composed object frequently. Just specify that object as <code class="highlighter-rouge">_default</code> and no more redundancy.</p>
+<p>A wrapper class sometimes make things redundant. <code class="highlighter-rouge">GettAttr</code> is meant to simplify this if you use the composed object frequently. Just specify that object as <code class="highlighter-rouge">_default</code> and no more redundancy.</p>
 
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dls</span> <span class="o">=</span> <span class="n">dblock</span><span class="o">.</span><span class="n">dataloaders</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
 
