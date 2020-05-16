@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Meta Programming Aspects of fastai2 | Fueled Debugger</title>
+<meta name="generator" content="Jekyll v4.0.0" />
+<meta property="og:title" content="Meta Programming Aspects of fastai2" />
+<meta name="author" content="Kshitij Patil" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="fastai-v2 has “transformed” the way we write Python for Deep Learning. A library called ‘fastcore’ is where all the magic happens and is framework agnostic, so most of the ideas I’m about to discuss could be easily integrated in your favourite python library." />
+<meta property="og:description" content="fastai-v2 has “transformed” the way we write Python for Deep Learning. A library called ‘fastcore’ is where all the magic happens and is framework agnostic, so most of the ideas I’m about to discuss could be easily integrated in your favourite python library." />
+<link rel="canonical" href="https://kshitij09.github.io/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html" />
+<meta property="og:url" content="https://kshitij09.github.io/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html" />
+<meta property="og:site_name" content="Fueled Debugger" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-05-14T00:00:00-05:00" />
+<script type="application/ld+json">
+{"author":{"@type":"Person","name":"Kshitij Patil"},"description":"fastai-v2 has “transformed” the way we write Python for Deep Learning. A library called ‘fastcore’ is where all the magic happens and is framework agnostic, so most of the ideas I’m about to discuss could be easily integrated in your favourite python library.","mainEntityOfPage":{"@type":"WebPage","@id":"https://kshitij09.github.io/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html"},"@type":"BlogPosting","url":"https://kshitij09.github.io/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html","headline":"Meta Programming Aspects of fastai2","dateModified":"2020-05-14T00:00:00-05:00","datePublished":"2020-05-14T00:00:00-05:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/dev-blog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://kshitij09.github.io/dev-blog/feed.xml" title="Fueled Debugger" /><link rel="shortcut icon" type="image/x-icon" href="/dev-blog/images/favicon.ico"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Meta Programming Aspects of fastai2 | Fueled Debugger</title>
+<meta name="generator" content="Jekyll v4.0.0" />
+<meta property="og:title" content="Meta Programming Aspects of fastai2" />
+<meta name="author" content="Kshitij Patil" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="fastai-v2 has “transformed” the way we write Python for Deep Learning. A library called ‘fastcore’ is where all the magic happens and is framework agnostic, so most of the ideas I’m about to discuss could be easily integrated in your favourite python library." />
+<meta property="og:description" content="fastai-v2 has “transformed” the way we write Python for Deep Learning. A library called ‘fastcore’ is where all the magic happens and is framework agnostic, so most of the ideas I’m about to discuss could be easily integrated in your favourite python library." />
+<link rel="canonical" href="https://kshitij09.github.io/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html" />
+<meta property="og:url" content="https://kshitij09.github.io/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html" />
+<meta property="og:site_name" content="Fueled Debugger" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-05-14T00:00:00-05:00" />
+<script type="application/ld+json">
+{"author":{"@type":"Person","name":"Kshitij Patil"},"description":"fastai-v2 has “transformed” the way we write Python for Deep Learning. A library called ‘fastcore’ is where all the magic happens and is framework agnostic, so most of the ideas I’m about to discuss could be easily integrated in your favourite python library.","mainEntityOfPage":{"@type":"WebPage","@id":"https://kshitij09.github.io/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html"},"@type":"BlogPosting","url":"https://kshitij09.github.io/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html","headline":"Meta Programming Aspects of fastai2","dateModified":"2020-05-14T00:00:00-05:00","datePublished":"2020-05-14T00:00:00-05:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+<link href="https://unpkg.com/@primer/css/dist/primer.css" rel="stylesheet" />
+<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.7/css/all.css"><link type="application/atom+xml" rel="alternate" href="https://kshitij09.github.io/dev-blog/feed.xml" title="Fueled Debugger" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"> </script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head><body><header class="site-header">
+
+  <div class="wrapper">
+<a class="site-title" rel="author" href="/dev-blog/">Fueled Debugger</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger">
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewbox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger">
+<a class="page-link" href="/dev-blog/about/">About Me</a><a class="page-link" href="/dev-blog/search/">Search</a><a class="page-link" href="/dev-blog/categories/">Tags</a>
+</div>
+      </nav>
+</div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Meta Programming Aspects of fastai2</h1>
+<p class="page-description">fastai-v2 has "transformed" the way we write Python for Deep Learning. A library called 'fastcore' is where all the magic happens and is framework agnostic, so most of the ideas I'm about to discuss could be easily integrated in your favourite python library.</p>
+<p class="post-meta post-meta-title"><time class="dt-published" datetime="2020-05-14T00:00:00-05:00" itemprop="datePublished">
+        May 14, 2020
+      </time>• 
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <span class="p-author h-card" itemprop="name">Kshitij Patil</span></span>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      14 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i> 
+      
+        <a class="category-tags-link" href="/dev-blog/categories/#fastai">fastai</a>
+        
+      
+      </p>
+    
+
+    </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#encode-for-model-decode-for-yourself">encode for model, decode for yourself</a></li>
+<li class="toc-entry toc-h1"><a href="#method-overloading-and-type-dispatch">Method Overloading and Type Dispatch</a></li>
+<li class="toc-entry toc-h1"><a href="#patch-and-patch-property">@patch and @patch-property</a></li>
+<li class="toc-entry toc-h1"><a href="#you-can-delegate-the-rest">You can @delegate the rest</a></li>
+<li class="toc-entry toc-h1">
+<a href="#who-likes-boilerplate">Who likes boilerplate?</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#use_kwargs-and-use_kwargs_dict">@use_kwargs and @use_kwargs_dict</a></li>
+<li class="toc-entry toc-h2"><a href="#funcs_kwargs">@funcs_kwargs</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#docs-in-the-source-code-fire">@docs in the source code <img class="emoji" title=":fire:" alt=":fire:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f525.png" height="20" width="20"></a></li>
+<li class="toc-entry toc-h1"><a href="#get-it-easily-getattr">Get it easily (GetAttr)</a></li>
+<li class="toc-entry toc-h1"><a href="#references">References</a></li>
+</ul>
+<h1 id="encode-for-model-decode-for-yourself">
+<a class="anchor" href="#encode-for-model-decode-for-yourself" aria-hidden="true"><span class="octicon octicon-link"></span></a><code class="highlighter-rouge">encode</code> for model, <code class="highlighter-rouge">decode</code> for yourself</h1>
+
+<p>Conventionally, in PyTorch, we write most of the data pre-processing logic in a single block of code, IE, inside <code class="highlighter-rouge">__getitem__</code> of PyTorch <code class="highlighter-rouge">Dataset</code>. Even if we try to create separate methods for different parts of the Pipeline, we often end up creating highly coupled logic, which works best for your current project, but you often hesitate to reuse this code for your next project.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">WhaleDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datafolder</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s">'train'</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">transform</span> <span class="o">=</span>
+                 <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">()]),</span> <span class="n">y</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datafolder</span> <span class="o">=</span> <span class="n">datafolder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span> <span class="o">=</span> <span class="n">datatype</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span> <span class="o">==</span> <span class="s">'train'</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_files_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">datafolder</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transform</span> <span class="o">=</span> <span class="n">transform</span>
+
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">image_files_list</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span> <span class="o">==</span> <span class="s">'train'</span><span class="p">:</span>
+            <span class="n">img_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datafolder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span> <span class="o">==</span> <span class="s">'test'</span><span class="p">:</span>
+            <span class="n">img_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datafolder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_files_list</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5005</span><span class="p">,))</span>
+
+        <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="nb">open</span><span class="p">(</span><span class="n">img_name</span><span class="p">)</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s">'RGB'</span><span class="p">)</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span> <span class="o">==</span> <span class="s">'train'</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">image</span><span class="p">,</span> <span class="n">label</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span> <span class="o">==</span> <span class="s">'test'</span><span class="p">:</span>
+            <span class="c1"># so that the images will be in a correct order
+</span>            <span class="k">return</span> <span class="n">image</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_files_list</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>The problem with this approach is a lack of modularity and the ability to test individual block of code. Certain problems that might be left unnoticed with this design are (Considering image classification problem):</p>
+
+<ol>
+  <li>You displayed a single image from given filenames, are you sure the same image is not being repeated in a batch?</li>
+  <li>You got the numeric labels from given text labels, but are you sure they’re mapped properly, do you know their reverse mapping?</li>
+  <li>how you tried several permutations of your given augmentations? What if your subject is getting cropped out of the image and you left wondering why my model isn’t converging 🤔</li>
+  <li>Are you sure that your split logic isn’t mixing the train and validation set?</li>
+</ol>
+
+<p>We need a better way to organize the <code class="highlighter-rouge">Transforms</code> and fastai-v2 has introduced a novel way for this. A <code class="highlighter-rouge">Transform</code> class in fastai2 has a special behavior due to its <code class="highlighter-rouge">encodes</code>, <code class="highlighter-rouge">decodes</code>, and <code class="highlighter-rouge">setup</code> methods.</p>
+
+<p><img src="/dev-blog/images/meta-fastai/fastai-encode-decode.png" style="zoom:200%;"></p>
+
+<p>As name suggests, <code class="highlighter-rouge">encodes</code> hold primary logic of transforming the input, which next <code class="highlighter-rouge">transform</code> will grab as input, process it and pass-on to the next. Similarly,  <code class="highlighter-rouge">decodes</code> has the logic of undoing the effect of current transform. An ideal use-case for <code class="highlighter-rouge">decodes</code> is to manage the inconsistencies between different libraries.</p>
+
+<blockquote>
+  <p>For instance, in object detection, suppose your math library uses a matrix notations for coordinates, so model will be trained to predict the bounding in that form, but your visualization library uses the exact opposite, so you want to undo the preprocessing step while showing the results and <code class="highlighter-rouge">decodes</code> is the place to keep that logic.</p>
+</blockquote>
+
+<p>Key features of<code class="highlighter-rouge">Transform</code> :</p>
+
+<ol>
+  <li>
+<strong>type-dispatch</strong>: yes ! you can define type-specific methods in Python <img class="emoji" title=":astonished:" alt=":astonished:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f632.png" height="20" width="20"> what do you think <code class="highlighter-rouge">TensorImage</code> is in the above image.? Here is the definition</li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">TensorImage</span><span class="p">(</span><span class="n">TensorImageBase</span><span class="p">):</span> <span class="k">pass</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">TensorImageBase</code> is just a wrapper around a PyTorch <code class="highlighter-rouge">Tensor</code> holding image channels and <code class="highlighter-rouge">TensorImage</code> is just an empty class.  We call it semantic type, as this type has some special treatment in the Pipeline. But the advantage is, now you can define a <code class="highlighter-rouge">Transform</code> (augmentation / preprocessing) for <code class="highlighter-rouge">TensorImage</code>, test that in isolation and just freeze that block of code in your library, no need to write that again in <code class="highlighter-rouge">__getitem__</code></p>
+
+<ol>
+  <li>
+    <p><strong>Handling tuples</strong>: you just pass in tuple of whatever, <code class="highlighter-rouge">Transform</code> will act on only types it’s allowed to (all instances of that type).</p>
+  </li>
+  <li>
+    <p><strong>Reversibility</strong>: As discussed earlier, you can define how to undo the operation performed on a <code class="highlighter-rouge">Tensor</code></p>
+  </li>
+  <li>
+    <p><strong>Ordering</strong>: you can define some order (int) for a <code class="highlighter-rouge">Transform</code> and they’ll be applied in the ascending order of that. Suppose, you want some augmentation to be applied before Normalization, just specify the order of your <code class="highlighter-rouge">Transform</code> lower than <code class="highlighter-rouge">Normalize</code> and it’ll be applied in desired order.</p>
+
+    <p>You can learn more about <code class="highlighter-rouge">Transform</code> <a href="http://fastcore.fast.ai/transform#The-main-Transform-features:">here</a>. Let’s look at an example:</p>
+  </li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Normalize</span><span class="p">(</span><span class="n">Transform</span><span class="p">):</span>
+    <span class="s">"Normalize/denorm batch of `TensorImage`"</span>
+    <span class="n">order</span><span class="o">=</span><span class="mi">99</span>
+    <span class="o">...</span>
+    <span class="k">def</span> <span class="nf">setups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dl</span><span class="p">:</span><span class="n">DataLoader</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span><span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">dl</span><span class="o">.</span><span class="n">one_batch</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span><span class="n">x</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="o">+</span><span class="mf">1e-7</span>
+
+    <span class="k">def</span> <span class="nf">encodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span><span class="n">TensorImage</span><span class="p">):</span> <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">std</span>
+    <span class="k">def</span> <span class="nf">decodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span><span class="n">TensorImage</span><span class="p">):</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">to_cpu</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="nb">type</span><span class="o">==</span><span class="s">'cpu'</span> <span class="k">else</span> <span class="n">noop</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std</span><span class="p">)</span> <span class="o">+</span> <span class="n">f</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">))</span>
+    <span class="o">...</span>
+</code></pre></div></div>
+<p><code class="highlighter-rouge">Normalize</code> is one of the transforms offered by fastai. The <code class="highlighter-rouge">setups</code> method is used to perform one-time calculations such as mean and standard deviation in this case. <code class="highlighter-rouge">encodes</code> is just a replacement for <code class="highlighter-rouge">__call__</code>  while <code class="highlighter-rouge">decodes</code> is denormalizing the Tensor. Notice the type-annotation <code class="highlighter-rouge">TensorImage</code> which has a lot more meaning than just a typing hint offered by Python 3.7. <code class="highlighter-rouge">Transform</code> also retains the types, IE, an input <code class="highlighter-rouge">TensorImage</code> will be returned as <code class="highlighter-rouge">TensorImage</code> only and all this is handled by a meta-class for <code class="highlighter-rouge">Transform</code></p>
+
+<h1 id="method-overloading-and-type-dispatch">
+<a class="anchor" href="#method-overloading-and-type-dispatch" aria-hidden="true"><span class="octicon octicon-link"></span></a>Method Overloading and Type Dispatch</h1>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">IntToFloatTensor</span><span class="p">(</span><span class="n">Transform</span><span class="p">):</span>
+    <span class="s">"Transform image to float tensor, optionally dividing by 255 (e.g. for images)."</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="mi">10</span> <span class="c1">#Need to run after PIL transforms on the GPU
+</span>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">div</span><span class="o">=</span><span class="mf">255.</span><span class="p">,</span> <span class="n">div_mask</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span> <span class="n">store_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">'div,div_mask'</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">encodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span><span class="n">TensorImage</span><span class="p">):</span> <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="nb">float</span><span class="p">()</span><span class="o">.</span><span class="n">div_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">div</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">encodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span><span class="n">TensorMask</span> <span class="p">):</span> <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="nb">long</span><span class="p">()</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">div_mask</span>
+    <span class="k">def</span> <span class="nf">decodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span><span class="n">TensorImage</span><span class="p">):</span> <span class="k">return</span> <span class="p">((</span><span class="n">o</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">div</span><span class="p">)</span><span class="o">.</span><span class="nb">long</span><span class="p">())</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">div</span> <span class="k">else</span> <span class="n">o</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">IntToFloatTensor</code> has a separate behavior for <code class="highlighter-rouge">TensorImage</code> and <code class="highlighter-rouge">TensorMask</code> and this is achieved by dynamic type-dispatch. So if the type is <code class="highlighter-rouge">TensorImage</code>, it’ll be divided by 255 and returned as a float Tensor, whereas Masks won’t be scaled and returned as long Tensors. Now, say, you want to return a double() Tensor instead of float and add some $\epsilon$=1e-7 to it, you can simply do that using <code class="highlighter-rouge">@IntToFloatTensor</code> decorator.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">IntToFloatTensor</span>
+<span class="k">def</span> <span class="nf">encodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">TensorImage</span><span class="p">):</span> <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">double</span><span class="p">()</span><span class="o">.</span><span class="n">div_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">div</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-7</span>
+</code></pre></div></div>
+
+<p>which means, you don’t need to write a class extending <code class="highlighter-rouge">Transform</code>, if it’s some variation of existing one in the library, just write type-annotated <code class="highlighter-rouge">encodes</code> with a decorator of that method.</p>
+
+<blockquote>
+  <p>You don’t necessarily need extend the <code class="highlighter-rouge">Transform</code> class to make type-dispatch work. There’s a decorator for that as well</p>
+</blockquote>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">typedispatch</span>
+<span class="k">def</span> <span class="nf">show_results</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="n">TensorImage</span><span class="p">,</span> <span class="n">y</span><span class="p">:(</span><span class="n">TensorMask</span><span class="p">,</span> <span class="n">TensorPoint</span><span class="p">,</span> <span class="n">TensorBBox</span><span class="p">),</span> <span class="o">...</span><span class="p">):</span>
+
+<span class="o">@</span><span class="n">typedispatch</span>
+<span class="k">def</span> <span class="nf">show_results</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="n">TensorImage</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span><span class="n">TensorCategory</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>
+
+<span class="o">@</span><span class="n">typedispatch</span>
+<span class="k">def</span> <span class="nf">show_results</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="n">TensorImage</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span><span class="n">TensorImage</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>
+</code></pre></div></div>
+
+<p>fastai has utility functions to show the training results. Now, each combination has a different way of showing the results. For example, <code class="highlighter-rouge">TensorImage</code> and <code class="highlighter-rouge">TensorCategory</code> will simply show the image with target vs predicted label as title. A <code class="highlighter-rouge">TensorImage</code> with any localization type will actually show both ground-truth and predicted images.</p>
+
+<p><img src="/dev-blog/images/meta-fastai/seg-show-results.png"></p>
+
+<p>In this case, a ground-truth segmentation mask (left) and predicted (right) mask is shown as result. Look how everything is coming together and those semantic types are the actors in this plot <img class="emoji" title=":sunglasses:" alt=":sunglasses:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f60e.png" height="20" width="20"></p>
+
+<h1 id="patch-and-patch-property">
+<a class="anchor" href="#patch-and-patch-property" aria-hidden="true"><span class="octicon octicon-link"></span></a><code class="highlighter-rouge">@patch</code> and <code class="highlighter-rouge">@patch-property</code>
+</h1>
+
+<p>There are several practices used to extend the functionality of existing class in the library. Swift or Kotlin does this by writing extension functions. “Monkey-patching” is one of those aspects used by several python libraries and fastai provides a decorator for that. A cool example of this:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">patch</span>
+<span class="k">def</span> <span class="nf">pca</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="s">"Compute PCA of `x` with `k` dimensions."</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">U</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">V</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">t</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">mm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">U</span><span class="p">[:,:</span><span class="n">k</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>We’re monkey-patching a method to compute PCA of given <code class="highlighter-rouge">Tensor</code> which allows us to call this method as if it was part of PyTorch tensors; so you can simply call <code class="highlighter-rouge">x.pca()</code>  and it’ll work like a charm. Another great example of this, if you’re coming from <code class="highlighter-rouge">numpy</code> background, you might be used to the <code class="highlighter-rouge">shape</code> property of arrays. This is not available in <code class="highlighter-rouge">PyTorch</code>, but not anymore, just patch it to the <code class="highlighter-rouge">Tensor</code> class and you’re good to go:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">patch_property</span>
+<span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Image</span><span class="o">.</span><span class="n">Image</span><span class="p">):</span> <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>Another example that I couldn’t resist to mention, you’ve a <code class="highlighter-rouge">ls()</code> method for Path class, thanks to <code class="highlighter-rouge">@patch</code> <img class="emoji" title=":wink:" alt=":wink:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f609.png" height="20" width="20"></p>
+
+<h1 id="you-can-delegate-the-rest">
+<a class="anchor" href="#you-can-delegate-the-rest" aria-hidden="true"><span class="octicon octicon-link"></span></a>You can <code class="highlighter-rouge">@delegate</code> the rest</h1>
+
+<p>Say you are writing a wrapper for library function to add some tweaks and you’re only concerned with some parameters, rest of them will be passed on to the original method, how can you make sure that user should be able to work with every-single-parameter of original method. You need to write all those parameters in your method definition, don’t you?. Let’s work with <code class="highlighter-rouge">matplotlib</code> for this:</p>
+
+<p><code class="highlighter-rouge">matplotlib.pyplot.plot</code> has several customization parameters for graph, but we don’t really know all of them. As per <a href="https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot">matplotlib documentation</a>, these are the properties of <code class="highlighter-rouge">Line2D</code> class, however, as matplotlib uses **kwargs to handle them, it remains mystery what all we can modify:</p>
+
+<p><img src="/dev-blog/images/meta-fastai/plt-plot.png"></p>
+
+<p>This is the type-hint you get in the IDE for <code class="highlighter-rouge">plt.plot()</code> method and clearly most of the arguments are disguised in the **kwargs. I wrote a simple wrapper function for this which delegates those kwargs to Line2D.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">delegates</span><span class="p">(</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">Line2D</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">mat_plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+  <span class="k">return</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>And…. the result is:</p>
+
+<p><img src="/dev-blog/images/meta-fastai/mat_plot.png"></p>
+
+<p><img class="emoji" title=":frowning:" alt=":frowning:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f626.png" height="20" width="20"> we have these many arguments to play with!!</p>
+
+<p>But <code class="highlighter-rouge">@delegates</code> isn’t just used to make those type-hints appear for you, you can have your own parameters along with those **kwargs.</p>
+
+<blockquote>
+  <p>in simple terms, your method doesn’t actually accept the kwargs, but the only parameters that are available in the method you’re delegating to.</p>
+</blockquote>
+
+<p>For example, in fastai, there’s a method called <code class="highlighter-rouge">save_model</code> which has the logic to save the PyTorch model to given path. Now <code class="highlighter-rouge">Learner</code> has the “model”, “optimizer state” and some parameters which could be used to create the “destination path” for <code class="highlighter-rouge">save_model</code>, so <code class="highlighter-rouge">Learner</code> will build the desired path and hand over its available parameters to <code class="highlighter-rouge">save_model</code> to perform actual save:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">delegates</span><span class="p">(</span><span class="n">save_model</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+	<span class="nb">file</span> <span class="o">=</span> <span class="n">join_path_file</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s">'.pth'</span><span class="p">)</span>
+	<span class="n">save_model</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">'opt'</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">@delegates</code> could also be used with classes. With no target specified, it’ll delegate the parameters from you constructor to the base class’s one.</p>
+
+<h1 id="who-likes-boilerplate">
+<a class="anchor" href="#who-likes-boilerplate" aria-hidden="true"><span class="octicon octicon-link"></span></a>Who likes boilerplate?</h1>
+
+<p>Some decorators that makes you write even lesser code with Python <img class="emoji" title=":bangbang:" alt=":bangbang:" src="https://github.githubassets.com/images/icons/emoji/unicode/203c.png" height="20" width="20"></p>
+
+<div class="Toast">
+   <span class="Toast-icon"><svg class="octicon octicon-info" viewbox="0 0 14 16" version="1.1" width="14" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 01-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 01-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"></path></svg></span>
+   <span class="Toast-content">Now we're manipulating the signature of class/method</span>
+</div>
+
+<p>Do you want to control what could be passed in those <code class="highlighter-rouge">**kwargs</code>? This is not for your convenience <img class="emoji" title=":stuck_out_tongue:" alt=":stuck_out_tongue:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f61b.png" height="20" width="20">actually, end users would always like to know what they could pass in those <code class="highlighter-rouge">**kwargs</code> instead of guessing randomly. So it’s a deal benefiting both the parties.</p>
+
+<h2 id="use_kwargs-and-use_kwargs_dict">
+<a class="anchor" href="#use_kwargs-and-use_kwargs_dict" aria-hidden="true"><span class="octicon octicon-link"></span></a><code class="highlighter-rouge">@use_kwargs</code> and <code class="highlighter-rouge">@use_kwargs_dict</code>
+</h2>
+
+<p>Making your method super flexible has no harm and who knows it may cover the use-case that you didn’t even think of. Also, cutting down the parameter list because it’s getting too long is not a great excuse either. So, you have a method with most of the kwargs being <code class="highlighter-rouge">None</code> and tired of listing all of them? or you’ve already listed them somewhere else? then <code class="highlighter-rouge">@use_kwargs</code> is made for you. Borrowing this snippet from <a href="https://github.com/KevinMusgrave/pytorch-metric-learning/blob/93e6421addc822d7565c64d7ff166d46be757acd/src/pytorch_metric_learning/trainers/base_trainer.py#L9">pytorch-metric-learning</a> (modified a bit for brevity)</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Trainer</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">models</span><span class="p">,</span>
+               <span class="n">loss_funcs</span><span class="p">,</span>
+               <span class="n">mining_funcs</span><span class="p">,</span>
+               <span class="n">iterations_per_epoch</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">data_device</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">loss_weights</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">sampler</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">collate_fn</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">lr_schedulers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">gradient_clippers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">data_and_label_getter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">dataset_labels</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">end_of_iteration_hook</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">end_of_epoch_hook</span><span class="o">=</span><span class="bp">None</span>
+      <span class="p">):</span>
+    <span class="o">...</span>
+</code></pre></div></div>
+
+<p>of course there’s no harm in writing this way, but doesn’t it look too bulky? what if it grows even further? by the time you reach to actual logic for this method, the parameter list will already scare you off.  Also, say you’ve written this list somewhere else, why do you want to re-write here as well? <code class="highlighter-rouge">@use_kwargs</code> will make things a little cute for you <img class="emoji" title=":wink:" alt=":wink:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f609.png" height="20" width="20"></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Trainer</span><span class="p">:</span>
+  <span class="n">_none_attrs</span><span class="o">=</span><span class="s">"""iterations_per_epoch data_device loss_wights sampler 
+                collate_fn lr_schedulers gradient_clippers data_and_labels_getter 
+                dataset_labels end_of_iteration_hook end_of_epoch_hook"""</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+  <span class="o">@</span><span class="n">use_kwargs</span><span class="p">(</span><span class="n">_none_attrs</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">models</span><span class="p">,</span><span class="n">loss_funcs</span><span class="p">,</span><span class="n">mining_funcs</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+  <span class="o">...</span>
+</code></pre></div></div>
+
+<p>But what if they’re not <code class="highlighter-rouge">None</code> and have their own default values <img class="emoji" title=":thinking:" alt=":thinking:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f914.png" height="20" width="20"> ? Borrowing this snippet from <a href="https://github.com/keras-team/keras/blob/1cf5218edb23e575a827ca4d849f1d52d21b4bb0/keras/preprocessing/image.py#L238">keras</a></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ImageDataGenerator</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">ImageDataGenerator</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">featurewise_center</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">samplewise_center</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">featurewise_std_normalization</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">samplewise_std_normalization</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">zca_whitening</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">zca_epsilon</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>
+                 <span class="n">rotation_range</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">width_shift_range</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">height_shift_range</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">brightness_range</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">shear_range</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">zoom_range</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">channel_shift_range</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">fill_mode</span><span class="o">=</span><span class="s">'nearest'</span><span class="p">,</span>
+                 <span class="n">cval</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">horizontal_flip</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">vertical_flip</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">rescale</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">preprocessing_function</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">data_format</span><span class="o">=</span><span class="s">'channels_last'</span><span class="p">,</span>
+                 <span class="n">validation_split</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                 <span class="n">interpolation_order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">dtype</span><span class="o">=</span><span class="s">'float32'</span><span class="p">):</span>
+       <span class="o">...</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ImageDataGenerator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
+            <span class="n">featurewise_center</span><span class="o">=</span><span class="n">featurewise_center</span><span class="p">,</span>
+            <span class="n">samplewise_center</span><span class="o">=</span><span class="n">samplewise_center</span><span class="p">,</span>
+            <span class="n">featurewise_std_normalization</span><span class="o">=</span><span class="n">featurewise_std_normalization</span><span class="p">,</span>
+            <span class="n">samplewise_std_normalization</span><span class="o">=</span><span class="n">samplewise_std_normalization</span><span class="p">,</span>
+            <span class="n">zca_whitening</span><span class="o">=</span><span class="n">zca_whitening</span><span class="p">,</span>
+            <span class="n">zca_epsilon</span><span class="o">=</span><span class="n">zca_epsilon</span><span class="p">,</span>
+            <span class="n">rotation_range</span><span class="o">=</span><span class="n">rotation_range</span><span class="p">,</span>
+            <span class="n">width_shift_range</span><span class="o">=</span><span class="n">width_shift_range</span><span class="p">,</span>
+            <span class="n">height_shift_range</span><span class="o">=</span><span class="n">height_shift_range</span><span class="p">,</span>
+            <span class="n">brightness_range</span><span class="o">=</span><span class="n">brightness_range</span><span class="p">,</span>
+            <span class="n">shear_range</span><span class="o">=</span><span class="n">shear_range</span><span class="p">,</span>
+            <span class="n">zoom_range</span><span class="o">=</span><span class="n">zoom_range</span><span class="p">,</span>
+            <span class="n">channel_shift_range</span><span class="o">=</span><span class="n">channel_shift_range</span><span class="p">,</span>
+            <span class="n">fill_mode</span><span class="o">=</span><span class="n">fill_mode</span><span class="p">,</span>
+            <span class="n">cval</span><span class="o">=</span><span class="n">cval</span><span class="p">,</span>
+            <span class="n">horizontal_flip</span><span class="o">=</span><span class="n">horizontal_flip</span><span class="p">,</span>
+            <span class="n">vertical_flip</span><span class="o">=</span><span class="n">vertical_flip</span><span class="p">,</span>
+            <span class="n">rescale</span><span class="o">=</span><span class="n">rescale</span><span class="p">,</span>
+            <span class="n">preprocessing_function</span><span class="o">=</span><span class="n">preprocessing_function</span><span class="p">,</span>
+            <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span>
+            <span class="n">validation_split</span><span class="o">=</span><span class="n">validation_split</span><span class="p">,</span>
+            <span class="n">interpolation_order</span><span class="o">=</span><span class="n">interpolation_order</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><img class="emoji" title=":frowning:" alt=":frowning:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f626.png" height="20" width="20"> <img class="emoji" title=":cold_sweat:" alt=":cold_sweat:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f630.png" height="20" width="20"> I’m not at all saying this bad, in fact, this follows the PEP8 coding standards; but the first question came into my mind was, what is <code class="highlighter-rouge">image.ImageDataGenerator</code> ? then I got to know, it came from another package called <code class="highlighter-rouge">keras_preprocessing</code>. So the next obvious question was, does that library has the exact same constructor, and indeed it <a href="https://github.com/keras-team/keras-preprocessing/blob/371ca04391566d00d4fea4b347612b1efc146997/keras_preprocessing/image/image_data_generator.py#L254">has</a>. Now, isn’t it redundant code? and what if, you’ve some factory methods in the class that uses partial or exact same set of parameters? Can we do better?</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ImageDataGenerator2</span><span class="p">(</span><span class="n">IGenerator</span><span class="p">):</span>
+  <span class="n">_datagen_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">featurewise_center</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">samplewise_center</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">featurewise_std_normalization</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">samplewise_std_normalization</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">zca_whitening</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">zca_epsilon</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span>
+                 <span class="n">rotation_range</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">width_shift_range</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">height_shift_range</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">brightness_range</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">shear_range</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">zoom_range</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">channel_shift_range</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">fill_mode</span><span class="o">=</span><span class="s">'nearest'</span><span class="p">,</span>
+                 <span class="n">cval</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">horizontal_flip</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">vertical_flip</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">rescale</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">preprocessing_function</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">data_format</span><span class="o">=</span><span class="s">'channels_last'</span><span class="p">,</span>
+                 <span class="n">validation_split</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                 <span class="n">interpolation_order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">dtype</span><span class="o">=</span><span class="s">'float32'</span><span class="p">)</span>
+  
+  <span class="o">@</span><span class="n">use_kwargs_dict</span><span class="p">(</span><span class="o">**</span><span class="n">_datagen_kwargs</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ImageDataGenerator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+  <span class="o">...</span>        
+        
+  <span class="n">_auglist</span> <span class="o">=</span> <span class="s">"""brightness_range samplewise_center 
+                samplewise_std_normalization zca_epsilon 
+                zca_whitening"""</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+  <span class="o">@</span><span class="nb">classmethod</span>
+  <span class="o">@</span><span class="n">use_kwargs_dict</span><span class="p">(</span><span class="o">**</span><span class="nb">dict</span><span class="p">((</span><span class="n">k</span><span class="p">,</span><span class="n">_datagen_kwargs</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_auglist</span><span class="p">))</span>
+  <span class="k">def</span> <span class="nf">augment</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="o">...</span>
+</code></pre></div></div>
+
+<p>At first, you might think what’s the difference <img class="emoji" title=":thinking:" alt=":thinking:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f914.png" height="20" width="20"> we ‘re just writing it in a dictionary instead of method definition. But I see three advantages here:</p>
+
+<ol>
+  <li>The <code class="highlighter-rouge">__init__</code> method is less scary and succinct.</li>
+  <li>We could reuse those parameters. As in the example, I’ve created a static method <code class="highlighter-rouge">augment</code> which is using partial set of parameters from the <code class="highlighter-rouge">_datagen_dict</code>.</li>
+  <li>It became a central place for default arguments. Suppose, in future, we decided to change the <code class="highlighter-rouge">data_format=channel_first</code>; this will require you to change it from all the mentions of the same to make it consistent. Whereas, in this case, changing it in our default dictionary will be reflected in all the other places, making it less error prone.</li>
+</ol>
+
+<div class="Toast Toast--warning googoo">
+   <span class="Toast-icon"><svg class="octicon octicon-alert" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 000 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 00.01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path></svg></span>
+   <span class="Toast-content">Note that, using **kwargs won't conceal the parameter list and you'll get all the parameters in type-completion  </span>
+</div>
+
+<p><img src="/dev-blog/images/meta-fastai/aug-hint.png"></p>
+
+<h2 id="funcs_kwargs">
+<a class="anchor" href="#funcs_kwargs" aria-hidden="true"><span class="octicon octicon-link"></span></a><code class="highlighter-rouge">@funcs_kwargs</code>
+</h2>
+
+<p>Now that we’re able handle kwargs in a better way, why not make the constructor accept methods as a parameter. Let’s define the default behavior for them, but let’s also allow the users to change it as well and that too, <strong>without inheritance</strong>.  One reason to avoid inheritance is, doing so might break the dependency chain. We were not concerned about the types so far (as python is dynamic language) but now that I’ve shown you the perks of type-dispatch, we need to worry about it a little.</p>
+
+<p>Again, we won’t be polluting the argument list of <code class="highlighter-rouge">__init__</code>, instead we’ve a contrived way for doing so <img class="emoji" title=":wink:" alt=":wink:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f609.png" height="20" width="20"></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">funcs_kwargs</span>
+<span class="k">class</span> <span class="nc">DataBlock</span><span class="p">():</span>
+    <span class="s">"Generic container to quickly build `Datasets` and `DataLoaders`"</span>
+    <span class="n">get_x</span><span class="o">=</span><span class="n">get_items</span><span class="o">=</span><span class="n">splitter</span><span class="o">=</span><span class="n">get_y</span><span class="o">=</span><span class="bp">None</span>
+    <span class="n">_methods</span> <span class="o">=</span> <span class="s">'get_items splitter get_y get_x'</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blocks</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dl_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">getters</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">n_inp</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">item_tfms</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">batch_tfms</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="o">...</span>
+</code></pre></div></div>
+
+<p>By adding <code class="highlighter-rouge">@funcs_kwargs</code> decorator to the class definition, you’ve enabled the users to modify any method you included in <code class="highlighter-rouge">_methods</code> list. For example,</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dblock</span> <span class="o">=</span> <span class="n">DataBlock</span><span class="p">(</span><span class="n">blocks</span><span class="o">=</span><span class="p">(</span><span class="n">ImageBlock</span><span class="p">,</span> <span class="n">CategoryBlock</span><span class="p">),</span>
+                 <span class="n">get_items</span><span class="o">=</span><span class="n">get_image_files</span><span class="p">,</span>
+                 <span class="n">splitter</span><span class="o">=</span><span class="n">RandomSplitter</span><span class="p">(),</span>
+                 <span class="n">get_y</span><span class="o">=</span><span class="n">parent_label</span><span class="p">,</span>
+                 <span class="n">item_tfms</span><span class="o">=</span><span class="n">item_tfms</span><span class="p">,</span>
+                 <span class="n">batch_tfms</span><span class="o">=</span><span class="n">batch_tfms</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">parent_label</code> is a function (simply returns the parent folder name) which is assigned to <code class="highlighter-rouge">get_y</code>. <code class="highlighter-rouge">DataBlock</code> makes <code class="highlighter-rouge">get_y</code> a no operation function unless you provide your implementation for that. (<code class="highlighter-rouge">@funcs_kwargs</code> are not shown in the auto-completion)</p>
+
+<h1 id="docs-in-the-source-code-fire">
+<a class="anchor" href="#docs-in-the-source-code-fire" aria-hidden="true"><span class="octicon octicon-link"></span></a><code class="highlighter-rouge">@docs</code> in the source code <img class="emoji" title=":fire:" alt=":fire:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f525.png" height="20" width="20">
+</h1>
+
+<p>Writing documentation in the source code is absolutely rewarding for two reasons.</p>
+
+<ol>
+  <li>It makes your source code readable</li>
+  <li>Documentation generator libraries such as <a href="https://www.sphinx-doc.org/en/master/">Sphinx</a>, <a href="https://www.mkdocs.org/">MkDocs</a>, <a href="https://nbdev.fast.ai/">nbdev</a> will generate the html docs for you</li>
+</ol>
+
+<p>But writing it within method/class definition itself will make it so not readable. Just look at this <a href="https://github.com/keras-team/keras/blob/7a39b6c62d43c25472b2c2476bd2a8983ae4f682/keras/layers/convolutional.py#L234">Conv1D</a> class <img class="emoji" title=":no_mouth:" alt=":no_mouth:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f636.png" height="20" width="20">,​ instead, grouping it at one place seems a better idea.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">docs</span>
+<span class="k">class</span> <span class="nc">DataLoaders</span><span class="p">(</span><span class="n">GetAttr</span><span class="p">):</span>
+	 <span class="n">_default</span><span class="o">=</span><span class="s">'train'</span>
+     <span class="n">_xtra</span><span class="o">=</span><span class="s">""</span>   
+	<span class="o">...</span>
+	 <span class="n">_docs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">__getitem__</span><span class="o">=</span><span class="s">"Retrieve `DataLoader` at `i` (`0` is training, `1` is validation)"</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="s">"Training `DataLoader`"</span><span class="p">,</span>
+	 		  <span class="n">valid</span><span class="o">=</span><span class="s">"Validation `DataLoader`"</span><span class="p">,</span>
+	 		  <span class="n">train_ds</span><span class="o">=</span><span class="s">"Training `Dataset`"</span><span class="p">,</span>
+	 		  <span class="n">valid_ds</span><span class="o">=</span><span class="s">"Validation `Dataset`"</span><span class="p">,</span>
+	 		  <span class="n">to</span><span class="o">=</span><span class="s">"Use `device`"</span><span class="p">,</span>
+	 		  <span class="n">cuda</span><span class="o">=</span><span class="s">"Use the gpu if available"</span><span class="p">,</span>
+	 		  <span class="n">cpu</span><span class="o">=</span><span class="s">"Use the cpu"</span><span class="p">,</span>
+	 		  <span class="n">new_empty</span><span class="o">=</span><span class="s">"Create a new empty version of `self` with the same transforms"</span><span class="p">,</span>
+	 		  <span class="n">from_dblock</span><span class="o">=</span><span class="s">"Create a dataloaders from a given `dblock`"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h1 id="get-it-easily-getattr">
+<a class="anchor" href="#get-it-easily-getattr" aria-hidden="true"><span class="octicon octicon-link"></span></a>Get it easily (<code class="highlighter-rouge">GetAttr</code>)</h1>
+
+<p>A wrapper class sometimes makes things redundant. <code class="highlighter-rouge">GettAttr</code> is meant to simplify this if you use the composed object frequently. Just specify that object as <code class="highlighter-rouge">_default</code> and no more redundancy.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dls</span> <span class="o">=</span> <span class="n">dblock</span><span class="o">.</span><span class="n">dataloaders</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+
+<span class="n">dls</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">n</span>	
+<span class="n">dls</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">vocab</span> 
+<span class="n">dls</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">tfms</span>
+<span class="n">dls</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">show_batch</span><span class="p">()</span>
+
+<span class="n">vs</span>
+
+<span class="n">dls</span><span class="o">.</span><span class="n">n</span>	
+<span class="n">dls</span><span class="o">.</span><span class="n">vocab</span> 
+<span class="n">dls</span><span class="o">.</span><span class="n">tfms</span>
+<span class="n">dls</span><span class="o">.</span><span class="n">show_batch</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>But what if wrapper class also has a method/property with that name <img class="emoji" title=":thinking:" alt=":thinking:" src="https://github.githubassets.com/images/icons/emoji/unicode/1f914.png" height="20" width="20"> ? then be specific about which properties you’d like to expose from the composed object.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">OptimWrapper</span><span class="p">(</span><span class="n">_BaseOptimizer</span><span class="p">,</span> <span class="n">GetAttr</span><span class="p">):</span>
+    <span class="n">_xtra</span><span class="o">=</span><span class="p">[</span><span class="s">'zero_grad'</span><span class="p">,</span> <span class="s">'step'</span><span class="p">,</span> <span class="s">'st ate_dict'</span><span class="p">,</span> <span class="s">'load_state_dict'</span><span class="p">]</span>
+    <span class="n">_default</span><span class="o">=</span><span class="s">'opt'</span>
+</code></pre></div></div>
+
+<p>This wrapper is used to wrap PyTorch Optimizers and to add some utility functions associated with it. So the original optimizer is stored as <code class="highlighter-rouge">opt</code> in this class and we don’t really want to access all attributes like <code class="highlighter-rouge">adam.opt.step</code>, <code class="highlighter-rouge">adam.opt.state_dict</code>. Thus, class inherits <code class="highlighter-rouge">GettAttr</code> alongside <code class="highlighter-rouge">_BaseOptimizer</code> (multiple inheritance is allowed in Python). The <code class="highlighter-rouge">_xtra</code> parameter will make sure only those attributes will be passed on to the <code class="highlighter-rouge">self</code>.</p>
+
+<p>These are the perquisites of dynamic Python and <code class="highlighter-rouge">fastcore</code> shows how malleable the language is. As I said in the beginning, you can start using all of these in your project as <code class="highlighter-rouge">fastcore</code> is independent of any Deep Learning framework. Hope you enjoyed the article, this is my first attempt to write such a thorough post, so your suggestions are most welcome!</p>
+
+<h1 id="references">
+<a class="anchor" href="#references" aria-hidden="true"><span class="octicon octicon-link"></span></a>References</h1>
+
+<ul>
+  <li><a href="http://fastcore.fast.ai/index.html">fastcore</a></li>
+  <li><a href="https://github.com/fastai/fastai2">fastai2</a></li>
+  <li><a href="https://arxiv.org/abs/2002.04688">fastai  paper</a></li>
+</ul>
+
+
+  </div>
+<!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js" repo="Kshitij09/dev-blog" issue-term="title" label="blogpost-comment" theme="github-light" crossorigin="anonymous" async>
+</script><a class="u-url" href="/dev-blog/fastai/2020/05/14/Meta-Programming-Aspects-of-fastai2.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/dev-blog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/dev-blog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/dev-blog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>Blending AI and Software Development</p>
+      </div>
+    </div>
+
+    <div class="social-links">
+<ul class="social-media-list">
+<li><a rel="me" href="https://github.com/Kshitij09" title="Kshitij09"><svg class="svg-icon grey"><use xlink:href="/dev-blog/assets/minima-social-icons.svg#github"></use></svg></a></li>
+<li><a rel="me" href="https://www.linkedin.com/in/kshitijpatil98" title="kshitijpatil98"><svg class="svg-icon grey"><use xlink:href="/dev-blog/assets/minima-social-icons.svg#linkedin"></use></svg></a></li>
+<li><a rel="me" href="https://twitter.com/kshitijpatil98" title="kshitijpatil98"><svg class="svg-icon grey"><use xlink:href="/dev-blog/assets/minima-social-icons.svg#twitter"></use></svg></a></li>
+</ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
