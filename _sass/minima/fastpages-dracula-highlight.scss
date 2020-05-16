@@ -42,7 +42,7 @@ $dt-green-light: rgb(172, 229, 145);
     text-rendering: optimizeLegibility;
     font-family: Menlo, Monaco, Consolas, "Lucida Console", Roboto, Ubuntu, monospace;
     border-radius: 5px;
-    font-size: 100%;
+    font-size: 110%;
 }
 .output_area pre, .output_area div {
     margin-bottom:1rem !important;
@@ -50,9 +50,9 @@ $dt-green-light: rgb(172, 229, 145);
     padding-bottom:0 !important;
     padding-top:0 !important;
 }
-.input_area pre {
+/*.input_area pre {
     border-left: 1px solid lightcoral;
-}
+}*/
 .output_area pre {
     border-left: 1px solid grey;
     margin-left: 1rem !important;
@@ -76,6 +76,7 @@ $dt-green-light: rgb(172, 229, 145);
     pre, code {
      background: $dt-code-cell-background;
      color: $dt-gray-light;
+     font-size: 105%;
     }
    
     .hll,

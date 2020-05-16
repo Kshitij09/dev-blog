@@ -7,7 +7,7 @@
 /*-----------------------------------*/
 /*----- ADD YOUR STYLES BELOW -------*/
 
-p {
+p, li {
     code {
         color: #f92672;
         background-color: #fafafa;
@@ -27,7 +27,7 @@ img.emoji {
 h1, h2, h3, h4 {
     code {
         color: #f92672;
-        background-color: #fafafa;
+        background-color: white;
         border: hidden;
         font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
         font-size: 95%;
@@ -35,5 +35,5 @@ h1, h2, h3, h4 {
 }
 
 // If you want to turn off dark background for syntax highlighting, comment or delete the below line.
-// @import "minima/fastpages-dracula-highlight"; 
-@import "minima/one-light"; 
+@import "minima/fastpages-dracula-highlight"; 
+// @import "minima/one-light"; 
