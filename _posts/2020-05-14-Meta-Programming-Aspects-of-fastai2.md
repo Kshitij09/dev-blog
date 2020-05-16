@@ -12,7 +12,7 @@ layout: post
 
 # `encode` for model, `decode` for yourself
 
-Conventionally, in PyTorch, we write most of the data pre-processing logic in a single block of code, IE, inside `__getitem__` of PyTorch `Dataset`. Even if we try to create separate methods for different parts of the Pipeline, we often end up creating highly coupled logic, which works best for your current project, but you often hesitate to reuse this code for your next project. 
+Conventionally, in PyTorch, we write most of the data pre-processing logic in a single block of code, IE, inside `__getitem__` of PyTorch `Dataset`. Even if we try to create separate methods for different parts of the Pipeline, we end up creating highly coupled logic, which works best for your current project, but you often hesitate to reuse this code for your next project. 
 
 ```python
 class WhaleDataset(Dataset):
@@ -48,18 +48,18 @@ class WhaleDataset(Dataset):
             return image, label, self.image_files_list[idx]
 ```
 
-The problem with this approach is a lack of modularity and the ability to test individual block of code. Certain problems that might be left unnoticed with this design are (Considering image classification problem):
+The problem with this approach is a lack of modularity and the ability to test individual block of code. Certain problems that might be left unnoticed with this design are (considering image classification problem):
 
 1. You displayed a single image from given filenames, are you sure the same image is not being repeated in a batch?
-2. You got the numeric labels from given text labels, but are you sure they're mapped properly, do you know their reverse mapping?
-3. how you tried several permutations of your given augmentations? What if your subject is getting cropped out of the image and you left wondering why my model isn't converging 🤔
-4. Are you sure that your split logic isn't mixing the train and validation set?
+2. You got the numeric labels from given text labels, but are you sure they're mapped properly, do you know their reverse mapping, as in, which no. represents what?
+3. have you tried several permutations of your given augmentations? What if your subject is getting cropped out of the image and you left wondering why my model isn't converging 🤔
+4. Are you sure the split logic isn't mixing the train and validation set?
 
-We need a better way to organize the `Transforms` and fastai-v2 has introduced a novel way for this. A `Transform` class in fastai2 has a special behavior due to its `encodes`, `decodes`, and `setup` methods.
+We need a better way to organize the `Transforms` and fastai has introduced a novel way for this. A `Transform` class from fastcore (library from fastai) has a special behavior due to its `encodes`, `decodes`, and `setup` methods.
 
 <img src="{{site.baseurl}}/images/meta-fastai/fastai-encode-decode.png" style="zoom:200%;">
 
-As name suggests, `encodes` hold primary logic of transforming the input, which next `transform` will grab as input, process it and pass-on to the next. Similarly,  `decodes` has the logic of undoing the effect of current transform. An ideal use-case for `decodes` is to manage the inconsistencies between different libraries.  
+As name suggests, `encodes` hold primary logic of transforming the input, which the next `transform` will grab as input, process it and pass-on to the next. Similarly,  `decodes` has the logic of undoing the effect of current transform. An ideal use-case for `decodes` is to manage the inconsistencies between different libraries.  
 
 > For instance, in object detection, suppose your math library uses a matrix notations for coordinates, so model will be trained to predict the bounding in that form, but your visualization library uses the exact opposite, so you want to undo the preprocessing step while showing the results and `decodes` is the place to keep that logic.
 
@@ -118,7 +118,7 @@ class IntToFloatTensor(Transform):
 def encodes(self, x: TensorImage): return x.double().div_(self.div) + 1e-7
 ```
 
-which means, you don't need to write a class extending `Transform`, if it's some variation of existing one in the library, just write type-annotated `encodes` with a decorator of that method.
+which means, you don't need to write a class extending `Transform` if it's some variation of existing one in the library, just write type-annotated `encodes` with a decorator of that method.
 
 > You don't necessarily need extend the `Transform` class to make type-dispatch work. There's a decorator for that as well
 
@@ -187,13 +187,16 @@ But `@delegates` isn't just used to make those type-hints appear for you, you ca
 
 > in simple terms, your method doesn't actually accept the kwargs, but the only parameters that are available in the method you're delegating to. 
 
-For example, in fastai, there's a method called `save_model` which has the logic to save the PyTorch model to given path. Now `Learner` has the "model", "optimizer state" and some parameters which could be used to create the "destination path" for `save_model`, so `Learner` will build the desired path and hand over its available parameters to `save_model` to perform actual save:
+For example, in fastai, there's a method called `save_model` which has the logic to save the PyTorch model to a given path. Now `Learner` has the "model", "optimizer state" and some parameters which could be used to create the "destination path" for `save_model`, so `Learner` will build the desired path and hand over its available parameters to `save_model` to perform actual save:
 
 ```python
-@delegates(save_model)
-def save(self, file, **kwargs):
-	file = join_path_file(file, self.path/self.model_dir, ext='.pth')
-	save_model(file, self.model, getattr(self,'opt',None), **kwargs)
+class Learner():
+    ...
+    
+    @delegates(save_model)
+    def save(self, file, **kwargs):
+        file = join_path_file(file, self.path/self.model_dir, ext='.pth')
+        save_model(file, self.model, getattr(self,'opt',None), **kwargs)
 ```
 
 `@delegates` could also be used with classes. With no target specified, it'll delegate the parameters from you constructor to the base class's one.
@@ -230,7 +233,7 @@ class Trainer:
     ...
 ```
 
-of course there's no harm in writing this way, but doesn't it look too bulky? what if it grows even further? by the time you reach to actual logic for this method, the parameter list will already scare you off.  Also, say you've written this list somewhere else, why do you want to re-write here as well? `@use_kwargs` will make things a little cute for you :wink:
+of course there's no harm in writing this way, but doesn't it look too bulky? what if it grows even further? by the time you reach to actual logic of this method, the parameter list will already scare you off.  Also, say you've written this list somewhere else, why do you want to re-write here as well? `@use_kwargs` will make things a little cute for you :wink:
 
 ```python
 class Trainer:
@@ -299,7 +302,7 @@ class ImageDataGenerator(image.ImageDataGenerator):
             dtype=dtype)
 ```
 
-:frowning: :cold_sweat: I'm not at all saying this bad, in fact, this follows the PEP8 coding standards; but the first question came into my mind was, what is `image.ImageDataGenerator` ? then I got to know, it came from another package called `keras_preprocessing`. So the next obvious question was, does that library has the exact same constructor, and indeed it [has](https://github.com/keras-team/keras-preprocessing/blob/371ca04391566d00d4fea4b347612b1efc146997/keras_preprocessing/image/image_data_generator.py#L254). Now, isn't it redundant code? and what if, you've some factory methods in the class that uses partial or exact same set of parameters? Can we do better?
+:frowning: :cold_sweat: I'm not at all saying this bad, in fact, this follows the PEP8 coding standards; but the first question came into my mind was, what is `image.ImageDataGenerator` ? then I got to know, it came from another library called `keras_preprocessing`. So the next obvious question was, does that library has the exact same constructor, and indeed it [has](https://github.com/keras-team/keras-preprocessing/blob/371ca04391566d00d4fea4b347612b1efc146997/keras_preprocessing/image/image_data_generator.py#L254). Now, isn't it redundant code? and what if, you've some factory methods in the class that uses partial or exact same set of parameters? Can we do any better?
 
 ```python
 class ImageDataGenerator2(IGenerator):
@@ -383,7 +386,7 @@ dblock = DataBlock(blocks=(ImageBlock, CategoryBlock),
 
 # `@docs` in the source code :fire:
 
-Writing documentation in the source code is absolutely rewarding for two reasons.
+Writing documentation in the source code is absolutely rewarding, mainly, for two reasons.
 
 1. It makes your source code readable
 2. Documentation generator libraries such as [Sphinx](https://www.sphinx-doc.org/en/master/), [MkDocs](https://www.mkdocs.org/), [nbdev](https://nbdev.fast.ai/) will generate the html docs for you
@@ -409,7 +412,7 @@ class DataLoaders(GetAttr):
 
 # Get it easily (`GetAttr`)
 
-A wrapper class sometimes makes things redundant. `GettAttr` is meant to simplify this if you use the composed object frequently. Just specify that object as `_default` and no more redundancy.
+A wrapper class sometimes make things redundant. `GettAttr` is meant to simplify this if you use the composed object frequently. Just specify that object as `_default` and no more redundancy.
 
 ```python
 dls = dblock.dataloaders(...)
